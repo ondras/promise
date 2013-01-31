@@ -54,6 +54,7 @@ var require = function(id) {
         break;
 
         case "sinon":
+        	return sinon;
         break;
 
         default:
