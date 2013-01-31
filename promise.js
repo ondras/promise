@@ -40,7 +40,7 @@ Promise.prototype.then = function(onFulfilled, onRejected) {
  * @param {any} value
  */
 Promise.prototype.fulfill = function(value) {
-//	if (this._state != 0) { throw new Error("Promise already fulfilled/rejected"); }
+	if (this._state != 0) { return this; }
 
 	this._state = 1;
 	this._value = value;
@@ -55,7 +55,7 @@ Promise.prototype.fulfill = function(value) {
  * @param {any} value
  */
 Promise.prototype.reject = function(value) {
-//	if (this._state != 0) { throw new Error("Promise already fulfilled/rejected"); }
+	if (this._state != 0) { return this; }
 
 	this._state = 2;
 	this._value = value;
