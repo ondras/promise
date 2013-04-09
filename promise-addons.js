@@ -45,12 +45,13 @@ Promise.event = function(element, event, capture) {
 Promise.send = function(xhr, data) {
 	var promise = new this();
 	xhr.addEventListener("readystatechange", function(e) {
-		if (xhr.readyState != 4) { return; }
-		if (e.status == 200) {
-			promise.fulfill(xhr);
+		if (e.target.readyState != 4) { return; }
+		if (e.target.status == 200) {
+			promise.fulfill(e.target);
 		} else {
-			promise.reject(xhr);
+			promise.reject(e.target);
 		}
 	});
+	xhr.send(data);
 	return promise;
 }
