@@ -33,9 +33,11 @@ Promise.setTimeout = function(ms) {
  */
 Promise.event = function(element, event, capture) {
 	var promise = new this();
-	element.addEventListener(event, function(e) {
+	var cb = function(e) {
+		element.removeEventListener(event, cb, capture);
 		promise.fulfill(e);
-	}, capture);
+	}
+	element.addEventListener(event, cb, capture);
 	return promise;
 }
 
