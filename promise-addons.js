@@ -59,3 +59,16 @@ Promise.send = function(xhr, data) {
 	xhr.send(data);
 	return promise;
 }
+
+Promise.worker = function(url, message) {
+	var promise = new this();
+	var worker = new Worker(url);
+	Promise.event(worker, "message").then(function(e) {
+		promise.fulfill(e.data);
+	});
+	Promise.event(worker, "error").then(function(e) {
+		promise.reject(e.message);
+	});
+	worker.postMessage(message);
+	return promise;
+}
