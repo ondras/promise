@@ -1,15 +1,17 @@
 /**
  * Wait for all these promises to complete. One failed => this fails too.
  */
-Promise.when = function() {
+Promise.when = function(all) {
 	var promise = new this();
 	var counter = 0;
+	var results = [];
 
-	for (var i=0;i<arguments.length;i++) {
+	for (var i=0;i<all.length;i++) {
 		counter++;
-		arguments[i].then(function(result) {
+		all[i].then(function(result) {
+			results.push(result);
 			counter--;
-			if (!counter) { promise.fulfill(result); }
+			if (!counter) { promise.fulfill(results); }
 		}, function(reason) {
 			counter = 1/0;
 			promise.reject(reason);
