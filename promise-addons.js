@@ -8,11 +8,11 @@ Promise.when = function(all) {
 
 	for (var i=0;i<all.length;i++) {
 		counter++;
-		all[i].then(function(result) {
-			results.push(result);
+		all[i].then(function(index, result) {
+			results[index] = result;
 			counter--;
 			if (!counter) { promise.fulfill(results); }
-		}, function(reason) {
+		}.bind(null, i), function(reason) {
 			counter = 1/0;
 			promise.reject(reason);
 		});
