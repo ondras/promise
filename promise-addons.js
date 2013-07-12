@@ -44,6 +44,19 @@ Promise.event = function(element, event, capture) {
 }
 
 /**
+ * Promise-based wait for CSS transition end
+ */
+Promise.transition = function(element) {
+	if ("transition" in element.style) {
+		return this.event(element, "transitionend", false);
+	} else if ("webkitTransition" in element.style) {
+		return this.event(element, "webkitTransitionEnd", false);
+	} else {
+		return new this().fulfill();
+	}
+}
+
+/**
  * Promise-based version of XMLHttpRequest::send
  */
 Promise.send = function(xhr, data) {
