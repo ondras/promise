@@ -1,7 +1,7 @@
 /**
  * Wait for all these promises to complete. One failed => this fails too.
  */
-Promise.when = function(all) {
+Promise.all = Promise.when = function(all) {
 	var promise = new this();
 	var counter = 0;
 	var results = [];

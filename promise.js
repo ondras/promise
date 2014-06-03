@@ -6,8 +6,9 @@
 /**
  * @class A promise - value to be resolved in the future.
  * Implements the "Promises/A+" specification.
+ * @param {function} [resolver]
  */
-var Promise = function() {
+var Promise = function(resolver) {
 	this._state = 0; /* 0 = pending, 1 = fulfilled, 2 = rejected */
 	this._value = null; /* fulfillment / rejection value */
 
@@ -17,6 +18,8 @@ var Promise = function() {
 	}
 
 	this._thenPromises = []; /* promises returned by then() */
+
+	if (resolver) { this._invokeResolver(resolver); }
 }
 
 /**
@@ -128,3 +131,11 @@ Promise.prototype._executeCallback = function(cb) {
 
 	}
 }    
+
+Promise.prototype._invokeResolver = function(resolver) {
+	try {
+		resolver(this.fulfill.bind(this), this.reject.bind(this));
+	} catch (e) {
+		this.reject(e);
+	}
+}
