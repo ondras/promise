@@ -63,7 +63,7 @@ Promise.send = function(xhr, data) {
 	var promise = new this();
 	xhr.addEventListener("readystatechange", function(e) {
 		if (e.target.readyState != 4) { return; }
-		if (e.target.status == 200) {
+		if (e.target.status.toString().charAt(0) == "2") {
 			promise.fulfill(e.target);
 		} else {
 			promise.reject(e.target);
