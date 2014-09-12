@@ -72,32 +72,52 @@ Promise.prototype.reject = function(value) {
 	return this;
 }
 
-Promise.prototype.resolve = function(value) {
-	if (value == this) {
-		/* 2.3.1. If promise and x refer to the same object, reject promise with a TypeError as the reason. */
+Promise.prototype.resolve = function(x) {
+	/* 2.3.1. If promise and x refer to the same object, reject promise with a TypeError as the reason. */
+	if (x == this) {
 		this.reject(new TypeError("Promise resolved by its own instance"));
-	} else if (value instanceof this.constructor) {
-		/* 2.3.2. If x is a promise, adopt its state */
-		value.chain(this);
-	} else if (value !== null && (typeof(value) == "object" || typeof(value) == "function")) {
-		/* 2.3.3. Otherwise, if x is an object or function,  */
+		return;
+	}
+
+	/* 2.3.2. If x is a promise, adopt its state */
+	if (x instanceof this.constructor) {
+		x.chain(this);
+		return;
+	}
+
+	/* 2.3.3. Otherwise, if x is an object or function,  */
+	if (x !== null && (typeof(x) == "object" || typeof(x) == "function")) {
 		try {
-			var then = value.then;
+			var then = x.then;
 			if (typeof(then) == "function") {
 				/* 2.3.3.3. If then is a function, call it */
-				then.call(value, this.resolve.bind(this), this.reject.bind(this));
+				var called = false;
+				var resolvePromise = function(y) {
+					/* 2.3.3.3.1. If/when resolvePromise is called with a value y, run [[Resolve]](promise, y). */
+					if (called) { return; }
+					called = true;
+					this.resolve(y);
+				}
+				var rejectPromise = function(r) {
+					/* 2.3.3.3.2. If/when rejectPromise is called with a reason r, reject promise with r. */
+					if (called) { return; }
+					called = true;
+					this.reject(r);
+				}
+				then.call(x, resolvePromise.bind(this), rejectPromise.bind(this));
 			} else {
-				/* 2.3.3.4 If then is not a function, fulfill promise with x */
-				return this.fulfill(value);
+				/* 2.3.3.4 If then is not a function, fulfill promise with x. */
+				this.fulfill(x);
 			}
 		} catch (e) {
 			/* 2.3.3.2. If retrieving the property x.then results in a thrown exception e, reject promise with e as the reason. */
-			return this.reject(e);
+			this.reject(e);
 		}
-	} else {
-		/* 2.3.4. If x is not an object or function, fulfill promise with x. */ 
-		return this.fulfill(value);
+		return;
 	}
+
+	/* 2.3.4. If x is not an object or function, fulfill promise with x. */
+	this.fulfill(x);
 }
 
 /**
@@ -158,7 +178,7 @@ Promise.prototype._executeCallback = function(cb) {
 
 Promise.prototype._invokeResolver = function(resolver) {
 	try {
-		resolver(this.fulfill.bind(this), this.reject.bind(this));
+		resolver(this.resolve.bind(this), this.reject.bind(this));
 	} catch (e) {
 		this.reject(e);
 	}

@@ -3,18 +3,22 @@ eval(data);
 exports.data = data;
 
 exports.resolved = function(value) {
-	return new Promise().resolve(value);
+	var promise = new Promise();
+	promise.resolve(value);
+	return promise;
 };
 
 exports.rejected = function(value) {
-	return new Promise().reject(value);
+	var promise = new Promise();
+	promise.reject(value);
+	return promise;
 };
 
 exports.deferred = function() {
 	var promise = new Promise();
 	return {
 		promise: promise,
-		resolve: function(value) { return promise.resolve(value); },
-		reject: function(value) { return promise.reject(value); }
+		resolve: function(value) { promise.resolve(value); },
+		reject: function(value) { promise.reject(value); }
 	}
 };
