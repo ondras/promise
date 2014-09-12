@@ -1,4 +1,3 @@
-var l = require("console").log;
 /*
 	Any copyright is dedicated to the Public Domain.
 	http://creativecommons.org/publicdomain/zero/1.0/
@@ -6,7 +5,7 @@ var l = require("console").log;
 
 /**
  * @class A promise - value to be resolved in the future.
- * Implements the "Promises/A+" specification.
+ * Implements the "Promises/A+ 1.1" specification.
  * @param {function} [resolver]
  */
 var Promise = function(resolver) {
@@ -22,6 +21,48 @@ var Promise = function(resolver) {
 	this._thenPromises = []; /* promises returned by then() */
 
 	if (resolver) { this._invokeResolver(resolver); }
+}
+
+Promise.resolve = function(value) {
+	return new this(function(resolve, reject) {
+		resolve(value);
+	});
+}
+
+Promise.reject = function(reason) {
+	return new this(function(resolve, reject) {
+		reject(reason);
+	});
+}
+
+/**
+ * Wait for all these promises to complete. One failed => this fails too.
+ */
+Promise.all = Promise.when = function(all) {
+	return new this(function(resolve, reject) {
+		var counter = 0;
+		var results = [];
+
+		all.forEach(function(promise, index) {
+			counter++;
+			promise.then(function(result) {
+				results[index] = result;
+				counter--;
+				if (!counter) { resolve(results); }
+			}, function(reason) {
+				counter = 1/0;
+				reject(reason);
+			});
+		});
+	});
+}
+
+Promise.race = function(all) {
+	return new this(function(resolve, reject) {
+		all.forEach(function(promise) {
+			promise.then(resolve, reject);
+		});
+	});
 }
 
 /**
@@ -136,8 +177,13 @@ Promise.prototype.resolve = function(x) {
  * @param {Promise} promise
  */
 Promise.prototype.chain = function(promise) {
-//	l("chaining");
-	return this.then(promise.resolve.bind(promise), promise.reject.bind(promise));
+	var resolve = function(value) {
+		promise.resolve(value);
+	}
+	var reject = function(value) {
+		promise.reject(value);
+	}
+	return this.then(resolve, reject);
 }
 
 /**
@@ -150,7 +196,6 @@ Promise.prototype["catch"] = function(onRejected) {
 
 Promise.prototype._schedule = function() {
 	if (this._timeout) { return; } /* resolution already scheduled */
-//	l("scheduling");
 	this._timeout = setTimeout(this._processQueue.bind(this), 0);
 }
 
@@ -186,7 +231,6 @@ Promise.prototype._executeCallback = function(cb) {
 		/* 2.2.7.2. If either onFulfilled or onRejected throws an exception, promise2 must be rejected with the thrown exception as the reason. */
 		thenPromise.reject(e);
 	}
-
 }    
 
 Promise.prototype._invokeResolver = function(resolver) {
