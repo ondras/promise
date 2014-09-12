@@ -1,0 +1,20 @@
+{
+  "name": "promise.js",
+  "main": "promise.js",
+  "version": "1.1.0",
+  "homepage": "https://github.com/ondras/promise",
+  "authors": [
+    "Ondrej Zara <ondrej.zara@gmail.com> (http://ondras.zarovi.cz/)"
+  ],
+  "description": "Promise implementation compatible with Promises/A+ 1.1",
+  "keywords": [
+    "promise",
+    "promises",
+    "aplus"
+  ],
+  "license": "Public Domain",
+  "ignore": [
+    "**/.*",
+    "tests"
+  ]
+}
