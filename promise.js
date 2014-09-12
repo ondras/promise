@@ -136,7 +136,7 @@ Promise.prototype.resolve = function(x) {
  * @param {Promise} promise
  */
 Promise.prototype.chain = function(promise) {
-	l("chaining");
+//	l("chaining");
 	return this.then(promise.resolve.bind(promise), promise.reject.bind(promise));
 }
 
@@ -150,7 +150,7 @@ Promise.prototype["catch"] = function(onRejected) {
 
 Promise.prototype._schedule = function() {
 	if (this._timeout) { return; } /* resolution already scheduled */
-	l("scheduling");
+//	l("scheduling");
 	this._timeout = setTimeout(this._processQueue.bind(this), 0);
 }
 
@@ -179,14 +179,14 @@ Promise.prototype._executeCallback = function(cb) {
 	}
 
 	try {
-		var returned = cb(this._value);
+		var x = cb(this._value);
+		/* 2.2.7.1. If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x). */
+		thenPromise.resolve(x);
 	} catch (e) {
 		/* 2.2.7.2. If either onFulfilled or onRejected throws an exception, promise2 must be rejected with the thrown exception as the reason. */
-		thenPromise.reject(e); 
+		thenPromise.reject(e);
 	}
 
-	/* 2.2.7.1. If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x). */
-	thenPromise.resolve(returned);
 }    
 
 Promise.prototype._invokeResolver = function(resolver) {
