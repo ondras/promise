@@ -1,3 +1,4 @@
+var l = require("console").log;
 /*
 	Any copyright is dedicated to the Public Domain.
 	http://creativecommons.org/publicdomain/zero/1.0/
@@ -89,29 +90,39 @@ Promise.prototype.resolve = function(x) {
 	if (x !== null && (typeof(x) == "object" || typeof(x) == "function")) {
 		try {
 			var then = x.then;
-			if (typeof(then) == "function") {
-				/* 2.3.3.3. If then is a function, call it */
-				var called = false;
-				var resolvePromise = function(y) {
-					/* 2.3.3.3.1. If/when resolvePromise is called with a value y, run [[Resolve]](promise, y). */
-					if (called) { return; }
-					called = true;
-					this.resolve(y);
-				}
-				var rejectPromise = function(r) {
-					/* 2.3.3.3.2. If/when rejectPromise is called with a reason r, reject promise with r. */
-					if (called) { return; }
-					called = true;
-					this.reject(r);
-				}
-				then.call(x, resolvePromise.bind(this), rejectPromise.bind(this));
-			} else {
-				/* 2.3.3.4 If then is not a function, fulfill promise with x. */
-				this.fulfill(x);
-			}
 		} catch (e) {
 			/* 2.3.3.2. If retrieving the property x.then results in a thrown exception e, reject promise with e as the reason. */
 			this.reject(e);
+			return;
+		}
+
+		if (typeof(then) == "function") {
+			/* 2.3.3.3. If then is a function, call it */
+			var called = false;
+			var resolvePromise = function(y) {
+				/* 2.3.3.3.1. If/when resolvePromise is called with a value y, run [[Resolve]](promise, y). */
+				if (called) { return; }
+				called = true;
+				this.resolve(y);
+			}
+			var rejectPromise = function(r) {
+				/* 2.3.3.3.2. If/when rejectPromise is called with a reason r, reject promise with r. */
+				if (called) { return; }
+				called = true;
+				this.reject(r);
+			}
+
+			try {
+				then.call(x, resolvePromise.bind(this), rejectPromise.bind(this));
+			} catch (e) { /* 2.3.3.3.4. If calling then throws an exception e, */
+				/* 2.3.3.3.4.1. If resolvePromise or rejectPromise have been called, ignore it. */
+				if (called) { return; }
+				/* 2.3.3.3.4.2. Otherwise, reject promise with e as the reason. */
+				this.reject(e);
+			}
+		} else {
+			/* 2.3.3.4 If then is not a function, fulfill promise with x. */
+			this.fulfill(x);
 		}
 		return;
 	}
@@ -125,7 +136,8 @@ Promise.prototype.resolve = function(x) {
  * @param {Promise} promise
  */
 Promise.prototype.chain = function(promise) {
-	return this.then(promise.fulfill.bind(promise), promise.reject.bind(promise));
+	l("chaining");
+	return this.then(promise.resolve.bind(promise), promise.reject.bind(promise));
 }
 
 /**
@@ -138,6 +150,7 @@ Promise.prototype["catch"] = function(onRejected) {
 
 Promise.prototype._schedule = function() {
 	if (this._timeout) { return; } /* resolution already scheduled */
+	l("scheduling");
 	this._timeout = setTimeout(this._processQueue.bind(this), 0);
 }
 
