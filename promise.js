@@ -3,6 +3,9 @@
 	http://creativecommons.org/publicdomain/zero/1.0/
 */
 
+(function() {
+	if (window.Promise) { return; }
+
 /**
  * @class A promise - value to be resolved in the future.
  * Implements the "Promises/A+ 1.1" specification.
@@ -240,3 +243,7 @@ Promise.prototype._invokeResolver = function(resolver) {
 		this.reject(e);
 	}
 }
+
+window.Promise = Promise;
+
+})();

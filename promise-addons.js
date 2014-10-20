@@ -65,3 +65,12 @@ Promise.worker = function(url, message) {
 		worker.postMessage(message);
 	});
 }
+
+/**
+ * Promise for a requestAnimationFrame
+ */
+Promise.requestAnimationFrame = function() {
+	return new this(function(resolve, reject) {
+		requestAnimationFrame(resolve);
+	});
+}
