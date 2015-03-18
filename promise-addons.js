@@ -1,13 +1,13 @@
 (function (root, factory) {
 	if (typeof define === "function" && define.amd) {
-		define([ "exports" ], factory);
+		define([ "exports", "promise" ], factory);
 	} else if (typeof exports === "object") {
-		factory(exports);
+		factory(exports, require("promise"));
 	} else {
-		factory(root);
+		factory(root, root);
 	}
-}(this, function (exports) {
-	var Promise = exports.Promise || {};
+}(this, function (exports, promise) {
+	var Promise = promise.Promise;
 
 	/**
 	 * Promise-based version of setTimeout
@@ -85,4 +85,6 @@
 			requestAnimationFrame(resolve);
 		});
 	}
+
+	exports.Promise = Promise;
 }));
